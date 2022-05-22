@@ -1,77 +1,107 @@
 let capture;
 let posenet;
+let poses = [];
 let singlePose,skeleton;
 
 let height = 480;
 let width = 640;
 
-let scaling_factor = 2;
+let scaling_factor = 1;
 
 let scaled_width = width / scaling_factor;
 let scaled_height = height / scaling_factor;
 
-function setup() {
-    var vidcanvas = createCanvas(scaled_width, scaled_height);
+let scaled_x = scaled_width / width;
+let scaled_y = scaled_height / height;
 
-    // vidcanvas.position(100, 100);
+function setup() {
+    
+    var vidcanvas = createCanvas(scaled_width, scaled_height);
     
     vidcanvas.parent('vid');
     capture = createCapture(VIDEO)
     capture.hide();
 
     posenet = ml5.poseNet(capture,modelLoaded);
-    posenet.on("pose",receivedPoses)
+    posenet.on("pose",(result) => {
+
+        poses = result;
+
+        console.log(poses);
+
+        statusUpdate(poses);
+    });
 }
 
-// function windowResized() {
-//     resizeCanvas(600, 480);
-//   }
+function modelLoaded() {
 
-function receivedPoses(poses){
-    console.log(poses);
+    console.log("model loaded");
+    document.getElementById("status").innerHTML = "model loaded";
+}
+
+function statusUpdate(poses){
 
     if(poses.length > 0){
-        singlePose = poses[0].pose;
-        skeleton = poses[0].skeleton;
-        document.getElementById("status").innerHTML = "face detected";
+        if(poses.length == 1) {
+            document.getElementById("status").innerHTML = "person detected";
+        }
+        else {
+            document.getElementById("status").innerHTML = "multiple persons detected";
+        }
+        
     }
     else {
-        document.getElementById("status").innerHTML = "no face detected";
+        document.getElementById("status").innerHTML = "no person detected";
     }
 }
-
-function modelLoaded(){
-    console.log("Model loaded sucessfully");
-}
-
-// document.getElementById("toggle").addEventListener("click", toggleSkeleton => document.getElementById("toggle").innerHTML = "Hide");
 
 
 function draw() {
 
-    // imageMode(CENTER);
-
-    let scaled_x = scaled_width / width;
-    let scaled_y = scaled_height / height;
-
     image(capture, 0, 0, scaled_width, scaled_height, 0, 0, width, height);
 
-    // image.position(100, 100);
+    drawKeypoints();
+    drawSkeleton();
 
-    fill(0,255,0);
-
-    if(singlePose){
-        
-        for(let i=0;i<singlePose.keypoints.length; i++){
-            ellipse(singlePose.keypoints[i].position.x * scaled_x, singlePose.keypoints[i].position.y * scaled_y , 3 / scaling_factor, 3 / scaling_factor);
-        }
-        stroke(0,255,0);
-        strokeWeight(5 / scaling_factor);
-        for(let j=0;j<skeleton.length;j++){
-            line(skeleton[j][0].position.x * scaled_x, skeleton[j][0].position.y * scaled_y, skeleton[j][1].position.x * scaled_x, skeleton[j][1].position.y * scaled_y);
-        }
-    }
-    
-    
 }
 
+function drawKeypoints() {
+
+    for(let i = 0; i < poses.length; i++) {
+        
+        const pose = poses[i].pose;
+
+        for(let j = 0; j < pose.keypoints.length; j++) {
+
+            const keypoint = pose.keypoints[j];
+
+            if(keypoint.score > 0.2) {
+
+                fill(0,255,0);
+                ellipse(keypoint.position.x * scaled_x, keypoint.position.y * scaled_y , 5 / scaling_factor, 5 / scaling_factor);
+            }
+
+
+        }
+    }
+}
+
+function drawSkeleton() {
+
+    for(let i = 0; i < poses.length; i++) {
+        
+        const skeleton = poses[i].skeleton;
+
+        for(let j = 0; j < skeleton.length; j++) {
+
+            const src = skeleton[j][0];
+            const dst = skeleton[j][1];
+
+            stroke(0,255,0);
+            strokeWeight(5 / scaling_factor);
+
+            line(src.position.x * scaled_x, src.position.y * scaled_y, dst.position.x * scaled_x, dst.position.y * scaled_y);
+
+        }
+    }
+}
