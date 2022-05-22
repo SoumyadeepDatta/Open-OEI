@@ -91,10 +91,26 @@ function statusUpdate(poses) {
 
 function draw() {
 
-    image(capture, 0, 0, scaled_width, scaled_height, 0, 0, width, height);
+    const pv = document.getElementById("preview");
 
-    drawKeypoints();
-    drawSkeleton();
+    if(pv.checked) {
+
+        document.getElementById("vid").style.display = "block";
+        document.getElementById("switch").disabled = false;
+
+        image(capture, 0, 0, scaled_width, scaled_height, 0, 0, width, height);
+
+        const sw = document.getElementById("switch");
+
+        if(sw.checked) {
+            drawKeypoints();
+            drawSkeleton();
+        }
+    }
+    else {
+        document.getElementById("switch").disabled = true;
+        document.getElementById("vid").style.display = "none"; 
+    }
 
 }
 
@@ -138,3 +154,12 @@ function drawSkeleton() {
         }
     }
 }
+
+
+/**
+ * TODO
+ * global variable selectors
+ * description
+ * tools used
+ * change status text color
+ */
