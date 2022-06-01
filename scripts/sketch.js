@@ -1,3 +1,6 @@
+// import {stream_height, stream_width} from "./helper/media";
+// import {thr} from "./helper/controls";
+
 let capture;
 let posenet;
 let poses = [];
