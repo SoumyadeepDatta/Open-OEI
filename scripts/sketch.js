@@ -154,12 +154,3 @@ function drawSkeleton() {
         }
     }
 }
-
-
-/**
- * TODO
- * global variable selectors
- * description
- * tools used
- * change status text color
- */
